@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Form, Row, Col} from 'react-bootstrap'
+import { Button, Form, Row, Col, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import withQuery from 'with-query'
 
 
@@ -51,7 +51,14 @@ class Word extends React.Component{
   render(){
     let { word, prediction, isColored, weight } = this.props;
     let word_style = this.w_style(word, isColored, prediction, weight)
-    return <span> <span style={word_style}>{word}</span> </span>
+    let word_info = <Tooltip id={word + weight}>
+                      weight: {weight}
+                    </Tooltip>
+    return (
+      <OverlayTrigger key={word + weight} trigger='hover' overlay={word_info}>
+        <span> <span style={word_style}>{word}</span> </span>
+      </OverlayTrigger>
+    )
   }
 }
 
@@ -111,12 +118,15 @@ class App extends React.Component {
         </Col>
 
         <Col sm={{ span: 5 }} md={{ span: 5 }}>
-          <p> {textInput.split(" ").map((w, i) => {
+          <div style={{padding: "40px"}}> 
+          {textInput.split(" ").map((w, i) => {
             let word_index = result.word_to_color.findIndex(_w => _w === w)
             let isColored = word_index === -1 ? false : true; //no need to color the word
-            let weight = word_index === -1 ? null : result.contributions[word_index]
+            let weight = word_index === -1 ? 0 : result.contributions[word_index]
+            weight = Math.round(weight * 10000) / 10000
             return <Word key={i} word={w} prediction={result.prediction} isColored={isColored} weight={weight} /> 
-        })}</p>
+          })}
+          </div>
         </Col>
 
       </Row>
