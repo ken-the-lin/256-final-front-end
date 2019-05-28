@@ -33,10 +33,9 @@ class App extends React.Component {
     fetch(withQuery('http://127.0.0.1:5000/explain', {
       model_id: 1,
       sentence: sentence
-    }), { 
-      mode: 'no-cors'
-    })
-    .then(data => console.log(data))
+    }))
+    .then(data => data.json())
+    .then(json => console.log('my json', json))
     .catch(err => console.log(err))
 
   }
