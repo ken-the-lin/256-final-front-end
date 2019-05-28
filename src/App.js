@@ -6,6 +6,7 @@ import withQuery from 'with-query'
 // var sentence = "I hate this resturant, Never come here"
 //I hate this resturant, Never come here
 //This is the best Chinese restaurant I have ever been
+// I don't like this resturant, but its food is good
 class Word extends React.Component{
   weightToColorHex(weight){
     let w = Math.abs(weight)
@@ -30,7 +31,15 @@ class Word extends React.Component{
       let red = "#" + hex + "0000"
       let blue = "#" + "0060" + hex
       if (isColored){
-        bg_color = prediction === "NEGATIVE" ? red : blue
+        if (prediction === "NEGATIVE" && weight > 0)
+          bg_color = red
+        if (prediction === "NEGATIVE" && weight < 0)
+          bg_color = blue
+        if (prediction === "POSITIVE" && weight > 0)
+          bg_color = blue
+        if (prediction === "POSITIVE" && weight < 0) //
+          bg_color = red
+        // bg_color = prediction === "NEGATIVE" ? red : blue
         text_color = "white"
       }
       return {
