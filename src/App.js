@@ -69,6 +69,7 @@ class App extends React.Component {
       textInput: "",
       result: {prediction: null, word_to_color: [], contributions: []}
     }
+    this.model_id = React.createRef()
   }
 
   extract(data){
@@ -84,7 +85,7 @@ class App extends React.Component {
 
   handleClick(e){
     fetch(withQuery('http://127.0.0.1:5000/explain', {
-      model_id: 1,
+      model_id: this.model_id.current.value,
       sentence: this.state.textInput
     }))
     .catch(err => console.log(err))
@@ -110,7 +111,7 @@ class App extends React.Component {
             <Form.Label>Input Sentence</Form.Label>
             <Form.Control as="textarea" rows="3" ref={node => this.textInput = node} onChange={e => this.setState({textInput: e.target.value})}/>
           </Form.Group>
-          <Form.Control as="select">
+          <Form.Control as="select" ref={this.model_id}>
             <option>1</option>
             <option>2</option>
           </Form.Control>
