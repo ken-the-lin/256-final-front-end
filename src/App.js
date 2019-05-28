@@ -8,37 +8,37 @@ import withQuery from 'with-query'
 //This is the best Chinese restaurant I have ever been
 // I don't like this resturant, but its food is good
 class Word extends React.Component{
-  weightToColorHex(weight){
+  weightToLight(weight){
     let w = Math.abs(weight)
     if (w > 2.5)
-      return  "80"
+      return  "30"
     if (2.5 >= w && w > 2)
-      return  "90"
+      return  "40"
     if (2 >= w && w > 1.5)
-      return  "a0"
+      return  "50"
     if (1.5 >= w && w > 1)
-      return  "b0"
+      return  "60"
     if (1 >= w && w > 0.5)
-      return  "c0"
+      return  "70"
     if (0.5 >= w)
-      return  "d0"
+      return  "80"
 
   }
   w_style(word, isColored, prediction, weight) {
       let bg_color = "white" 
       let text_color = "black"
-      let hex = this.weightToColorHex(weight)
-      let red = "#" + hex + "0000"
-      let blue = "#" + "0060" + hex
+      let light = this.weightToLight(weight)
+      let red = "hsl(1, 100%, " + light + "%)"
+      let blue = "hsl(245, 100%, " + light + "%)"
       if (isColored){
         if (prediction === "NEGATIVE" && weight > 0)
-          bg_color = red
+          bg_color = blue
         if (prediction === "NEGATIVE" && weight < 0)
-          bg_color = blue
-        if (prediction === "POSITIVE" && weight > 0)
-          bg_color = blue
-        if (prediction === "POSITIVE" && weight < 0) //
           bg_color = red
+        if (prediction === "POSITIVE" && weight > 0)
+          bg_color = red
+        if (prediction === "POSITIVE" && weight < 0) //
+          bg_color = blue
         // bg_color = prediction === "NEGATIVE" ? red : blue
         text_color = "white"
       }
