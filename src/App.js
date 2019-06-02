@@ -1,7 +1,8 @@
 import React from 'react';
 import { Button, Form, Row, Col, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import withQuery from 'with-query'
-
+import Bar from './bar.js'
+import PieChart from './pichart.js'
 
 // var sentence = "I hate this resturant, Never come here"
 //I hate this resturant, Never come here
@@ -119,6 +120,9 @@ class App extends React.Component {
         </Col>
 
         <Col sm={{ span: 5 }} md={{ span: 5 }}>
+          <div>
+            prediction result: {result.prediction}
+          </div>
           <div style={{padding: "40px"}}> 
           {textInput.split(" ").map((w, i) => {
             let word_index = result.word_to_color.findIndex(_w => _w === w)
@@ -128,6 +132,8 @@ class App extends React.Component {
             return <Word key={i} word={w} prediction={result.prediction} isColored={isColored} weight={weight} /> 
           })}
           </div>
+          <Bar/>
+          <PieChart/>
         </Col>
 
       </Row>
