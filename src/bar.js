@@ -27,33 +27,44 @@ import {
 //   },
 // ];
 
+
 const data = []
 export default class Example extends PureComponent {
   static jsfiddleUrl = 'https://jsfiddle.net/alidingling/p82xhe2a/';
 
   render() {
     let { result } = this.props
+    let key = 'sign'
     let data = result.word_to_color.map((w,i) => {
       let pred = result.prediction
       let contr = result.contributions[i]
       let neg = 0
       let pos = 0
 
-      if (pred === 'NEGATIVE' && contr > 0)
+      let _pred = pred
+      if (pred === 'SPAM' || pred == 'NOTSPAM'){
+        key = 'spam'
+        _pred = pred === 'SPAM' ? 'NEGATIVE' : 'POSITIVE'
+      }
+
+      if (_pred === 'NEGATIVE' && contr > 0)
         neg = contr * -1
-      if (pred === 'POSITIVE' && contr < 0)
+      if (_pred === 'POSITIVE' && contr < 0)
         neg = contr
 
-      if (pred === 'POSITIVE' && contr > 0)
+      if (_pred === 'POSITIVE' && contr > 0)
         pos = contr
-      if (pred === 'NEGATIVE' && contr < 0)
+      if (_pred === 'NEGATIVE' && contr < 0)
         pos = contr * -1
 
-      return {
-        word: w, neg: neg, pos: pos, amt: 2000
-      }
+      return (pred === 'SPAM' || pred == 'NOTSPAM') ? 
+      { word: w, spam: neg, notspam: pos, amt:2000}
+      :
+      { word: w, neg: neg, pos: pos, amt: 2000 }
     })
-
+ 
+    let posKey = result.prediction === 'SPAM' || result.prediction === 'NOTSPAM' ?  'notspam' : 'pos'
+    let negKey = result.prediction === 'SPAM' || result.prediction === 'NOTSPAM' ?  'spam' : 'neg'
     return result.prediction ? (
       <BarChart
         width={700}
@@ -70,8 +81,8 @@ export default class Example extends PureComponent {
         <Tooltip />
         <Legend verticalAlign='top'/>
         <ReferenceLine y={0} stroke="#000" />
-        <Bar dataKey="pos" fill="#0000ff" stackId="stack" />
-        <Bar dataKey="neg" fill="#ff0000" stackId="stack" />
+        <Bar dataKey={posKey} fill="#0000ff" stackId="stack" />
+        <Bar dataKey={negKey} fill="#ff0000" stackId="stack" />
       </BarChart>
     ) : null;
   }

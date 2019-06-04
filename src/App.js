@@ -8,6 +8,9 @@ import PieChart from './pichart.js'
 //I hate this resturant, Never come here
 //This is the best Chinese restaurant I have ever been
 // I don't like this resturant, but its food is good
+const getPercent = (num) => {
+  return Math.round(num*10000) / 100
+}
 class Word extends React.Component{
   weightToLight(weight){
     let w = Math.abs(weight)
@@ -80,7 +83,7 @@ class App extends React.Component {
 
   extract(data){
     // .log("my data", data)
-    console.log("backend", data)
+    // console.log("backend", data)
     let { prediction, targets } = data
     let weighted_spans = targets[0].weighted_spans
     let word_count_total = targets[0].word_count_total
@@ -112,8 +115,55 @@ class App extends React.Component {
     })
   }
 
+  _makeExplanation(percent, word, pred){
+    // console.log(this.state.result)
+    let status = 'disconfirm'
+    let { prediction, contributions, word_to_color } = this.state.result
+    let weight = word_to_color.findIndex(w => w === word)
+    if (prediction === 'POSITIVE' && weight >= 0)
+      status = 'confirm'
+    if (prediction === 'NEGATIVE' && weight >= 0)
+      status = 'confirm'
+    let message = percent + '% of all reviews that contain the word \"' + word + "\"" +
+                  " are " + pred
+    return <span> {message} </span>
+  }
+
+  _renderPicharts(){
+    let { word_count_total } = this.state.result
+    // console.log("myprops", this.props.counts)
+    let mydata = word_count_total.map( obj => {
+      let { word, count, total } = obj
+      return [
+        {name: word, value: count},
+        {name: word, value: total - count}
+      ]
+    })
+    return mydata.map((d,i)=>{
+      let count = d[0].value
+      let rest = d[1].value
+      let word = d[0].name
+      let percent = getPercent(count/(count + rest))
+      return (
+        <Col md={{ offset: 3, span:9}} key={i}>
+          <Row>
+            <Col md={4}>
+              <PieChart data={d}/>
+            </Col>
+            <Col md={6}>
+              <div style={{"marginTop": "100px"}}>
+                {this._makeExplanation(percent, word, this.state.result.prediction)}
+              </div>
+            </Col>
+          </Row>
+        </Col>
+      )
+    })
+  }
+        // <Col sm={{ offset: 3, span: 3}} md={{ offset: 3, span:3}} key={i}>
+
   render(){
-    console.log('state', this.state)
+    // console.log('state', this.state)
     let { textInput, result } = this.state
     return (
       <div className="App">
@@ -157,9 +207,7 @@ class App extends React.Component {
           </Col>
         </Row>
         <Row>
-          <Col sm={{ offset: 3, span: 6}} md={{ offset: 3, span:6}}>
-            <PieChart word_count_total={this.state.result.word_count_total}/>
-          </Col>
+            {this._renderPicharts()}
         </Row>
 
     </div>

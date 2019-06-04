@@ -1,12 +1,14 @@
 import React, { PureComponent } from 'react';
 import { PieChart, Pie, Sector } from 'recharts';
+import {OverlayTrigger} from 'react-bootstrap';
+// const data = [
+//   { name: 'Group A', value: 400 },
+//   { name: 'Group B', value: 300 },
+//   { name: 'Group C', value: 300 }
+//   // { name: 'Group D', value: 200 },
+// ];
+var global_data = []
 
-const data = [
-  { name: 'Group A', value: 400 },
-  { name: 'Group B', value: 300 },
-  { name: 'Group C', value: 300 }
-  // { name: 'Group D', value: 200 },
-];
 
 const renderActiveShape = (props) => {
   const RADIAN = Math.PI / 180;
@@ -24,6 +26,8 @@ const renderActiveShape = (props) => {
   const ey = my;
   const textAnchor = cos >= 0 ? 'start' : 'end';
 
+  // let count = global_data[0].value
+  // let total = glo
   return (
     <g>
       <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>{payload.name}</text>
@@ -47,14 +51,16 @@ const renderActiveShape = (props) => {
       />
       <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
       <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
-      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="#333">{`PV ${value}`}</text>
-      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={18} textAnchor={textAnchor} fill="#999">
-        {`(Rate ${(percent * 100).toFixed(2)}%)`}
-      </text>
+        <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="#333">
+          {`(${(percent * 100).toFixed(2)}%)`}
+        </text>
     </g>
   );
 };
 
+   //   <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={18} textAnchor={textAnchor} fill="#999">
+     //   {`(${(percent * 100).toFixed(2)}%)`}
+     // </text>
 
 export default class Example extends PureComponent {
   static jsfiddleUrl = 'https://jsfiddle.net/alidingling/hqnrgxpj/';
@@ -70,22 +76,39 @@ export default class Example extends PureComponent {
   };
 
   render() {
-    let { word_count_total } = this.props
-    // console.log("myprops", this.props.counts)
-    let mydata = word_count_total.map( obj => {
-      let { word, count, total } = obj
-      return [
-        {name: word, value: count},
-        {name: word, value: total}
-      ]
-    })
-    console.log("pi char data", mydata)
-    let pi_charts = mydata.map((d, i) => (
-          <PieChart width={400} height={400} key={i}>
+    let { data } = this.props
+    // let { word_count_total } = this.props
+    // // console.log("myprops", this.props.counts)
+    // let mydata = word_count_total.map( obj => {
+    //   let { word, count, total } = obj
+    //   return [
+    //     {name: word, value: count},
+    //     {name: word, value: total}
+    //   ]
+    // })
+    // console.log("pi char data", mydata)
+    // let pi_charts = mydata.map((d, i) => (
+    //       <PieChart width={400} height={400} key={i}>
+    //         <Pie
+    //           activeIndex={this.state.activeIndex}
+    //           activeShape={renderActiveShape}
+    //           data={d}
+    //           cx={200}
+    //           cy={200}
+    //           innerRadius={60}
+    //           outerRadius={80}
+    //           fill="#8884d8"
+    //           dataKey="value"
+    //           onMouseEnter={this.onPieEnter}
+    //         />
+    //       </PieChart>
+    //   ))
+    return (
+          <PieChart width={400} height={400}>
             <Pie
               activeIndex={this.state.activeIndex}
               activeShape={renderActiveShape}
-              data={d}
+              data={data}
               cx={200}
               cy={200}
               innerRadius={60}
@@ -94,8 +117,6 @@ export default class Example extends PureComponent {
               dataKey="value"
               onMouseEnter={this.onPieEnter}
             />
-          </PieChart>
-      ))
-    return pi_charts
+          </PieChart>)
   }
 }
