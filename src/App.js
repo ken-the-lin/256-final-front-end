@@ -31,14 +31,18 @@ class Word extends React.Component{
       let light = this.weightToLight(weight)
       let red = "hsl(1, 100%, " + light + "%)"
       let blue = "hsl(245, 100%, " + light + "%)"
+      let _pred = prediction
+      if (prediction === 'SPAM' || prediction == 'NOTSPAM'){
+        _pred = prediction === 'SPAM' ? 'NEGATIVE' : 'POSITIVE'
+      }
       if (isColored){
-        if (prediction === "NEGATIVE" && weight > 0)
+        if (_pred === "NEGATIVE" && weight > 0)
           bg_color = blue
-        if (prediction === "NEGATIVE" && weight < 0)
+        if (_pred === "NEGATIVE" && weight < 0)
           bg_color = red
-        if (prediction === "POSITIVE" && weight > 0)
+        if (_pred === "POSITIVE" && weight > 0)
           bg_color = red
-        if (prediction === "POSITIVE" && weight < 0) //
+        if (_pred === "POSITIVE" && weight < 0) //
           bg_color = blue
         // bg_color = prediction === "NEGATIVE" ? red : blue
         text_color = "white"
@@ -68,20 +72,23 @@ class App extends React.Component {
     super(props)
     this.state = {
       textInput: "",
-      result: {prediction: null, word_to_color: [], contributions: []}
+      result: {prediction: null, word_to_color: [], contributions: [], word_count_total: []}
     }
     this.model_id = React.createRef()
+    this.handleClick = this.handleClick.bind(this)
   }
 
   extract(data){
     // .log("my data", data)
+    console.log("backend", data)
     let { prediction, targets } = data
     let weighted_spans = targets[0].weighted_spans
+    let word_count_total = targets[0].word_count_total
     let words = weighted_spans.map(ws => ws[0])
     let contributions = weighted_spans.map(ws => ws[2])
     // console.log(words)
     // console.log(contributions)
-    return { prediction, words, contributions }
+    return { prediction, words, contributions, word_count_total }
   }
 
   handleClick(e){
@@ -92,51 +99,69 @@ class App extends React.Component {
     .catch(err => console.log(err))
     .then(res => res.json())
     .then(data => {
-      let { prediction, words, contributions } = this.extract(data)
-      this.setState({result: { 
-        prediction: prediction, 
-        word_to_color: words, 
-        contributions: contributions 
-      }})
+        let { prediction, words, contributions, word_count_total } = this.extract(data)
+        this.setState({
+          result: { 
+            prediction: prediction, 
+            word_to_color: words, 
+            contributions: contributions, 
+            word_count_total: word_count_total
+          }
+        })
+
     })
   }
 
   render(){
+    console.log('state', this.state)
     let { textInput, result } = this.state
     return (
       <div className="App">
         <Row>
 
-        <Col sm={{ offset: 1, span: 5}} md={{ offset: 1, span: 5}}>
-          <Form.Group controlId="exampleForm.ControlTextarea1">
-            <Form.Label>Input Sentence</Form.Label>
-            <Form.Control as="textarea" rows="3" ref={node => this.textInput = node} onChange={e => this.setState({textInput: e.target.value})}/>
-          </Form.Group>
-          <Form.Control as="select" ref={this.model_id}>
-            <option>1</option>
-            <option>2</option>
-          </Form.Control>
-          <Button size='sm' onClick={() => this.handleClick()}> Click </Button>
-        </Col>
+          <Col sm={{ offset: 3, span: 6}} md={{ offset: 3, span:6}}>
+            <Form.Group controlId="exampleForm.ControlTextarea1">
+              <Form.Label>Input Sentence</Form.Label>
+              <Form.Control as="textarea" rows="3" ref={node => this.textInput = node} onChange={e => this.setState({textInput: e.target.value})}/>
+            </Form.Group>
+            <Form.Control as="select" ref={this.model_id}>
+              <option>1</option>
+              <option>2</option>
+            </Form.Control>
+          </Col>
+        </Row>
+        <Row>
+          <Col sm={{ offset: 3, span: 6}} md={{ offset: 3, span:6}}>
+            <Button size='sm' onClick={() => this.handleClick()}> Click </Button>
+          </Col>
+        </Row>
+        <Row>
+          <Col sm={{ offset: 3, span: 6}} md={{ offset: 3, span:6}}>
+            <div>
+              prediction result: {result.prediction}
+            </div>
+            <div style={{padding: "40px"}}> 
+            {textInput.split(" ").map((w, i) => {
+              let word_index = result.word_to_color.findIndex(_w => _w === w)
+              let isColored = word_index === -1 ? false : true; //no need to color the word
+              let weight = word_index === -1 ? 0 : result.contributions[word_index]
+              weight = Math.round(weight * 10000) / 10000
+              return <Word key={i} word={w} prediction={result.prediction} isColored={isColored} weight={weight} /> 
+            })}
+            </div>
+          </Col>
+        </Row>
+        <Row>
+          <Col sm={{ offset: 3, span: 6}} md={{ offset: 3, span:6}}>
+            <Bar result={this.state.result}/>
+          </Col>
+        </Row>
+        <Row>
+          <Col sm={{ offset: 3, span: 6}} md={{ offset: 3, span:6}}>
+            <PieChart word_count_total={this.state.result.word_count_total}/>
+          </Col>
+        </Row>
 
-        <Col sm={{ span: 5 }} md={{ span: 5 }}>
-          <div>
-            prediction result: {result.prediction}
-          </div>
-          <div style={{padding: "40px"}}> 
-          {textInput.split(" ").map((w, i) => {
-            let word_index = result.word_to_color.findIndex(_w => _w === w)
-            let isColored = word_index === -1 ? false : true; //no need to color the word
-            let weight = word_index === -1 ? 0 : result.contributions[word_index]
-            weight = Math.round(weight * 10000) / 10000
-            return <Word key={i} word={w} prediction={result.prediction} isColored={isColored} weight={weight} /> 
-          })}
-          </div>
-          <Bar/>
-          <PieChart/>
-        </Col>
-
-      </Row>
     </div>
     );
   }

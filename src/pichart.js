@@ -4,8 +4,8 @@ import { PieChart, Pie, Sector } from 'recharts';
 const data = [
   { name: 'Group A', value: 400 },
   { name: 'Group B', value: 300 },
-  { name: 'Group C', value: 300 },
-  { name: 'Group D', value: 200 },
+  { name: 'Group C', value: 300 }
+  // { name: 'Group D', value: 200 },
 ];
 
 const renderActiveShape = (props) => {
@@ -70,21 +70,32 @@ export default class Example extends PureComponent {
   };
 
   render() {
-    return (
-      <PieChart width={400} height={400}>
-        <Pie
-          activeIndex={this.state.activeIndex}
-          activeShape={renderActiveShape}
-          data={data}
-          cx={200}
-          cy={200}
-          innerRadius={60}
-          outerRadius={80}
-          fill="#8884d8"
-          dataKey="value"
-          onMouseEnter={this.onPieEnter}
-        />
-      </PieChart>
-    );
+    let { word_count_total } = this.props
+    // console.log("myprops", this.props.counts)
+    let mydata = word_count_total.map( obj => {
+      let { word, count, total } = obj
+      return [
+        {name: word, value: count},
+        {name: word, value: total}
+      ]
+    })
+    console.log("pi char data", mydata)
+    let pi_charts = mydata.map((d, i) => (
+          <PieChart width={400} height={400} key={i}>
+            <Pie
+              activeIndex={this.state.activeIndex}
+              activeShape={renderActiveShape}
+              data={d}
+              cx={200}
+              cy={200}
+              innerRadius={60}
+              outerRadius={80}
+              fill="#8884d8"
+              dataKey="value"
+              onMouseEnter={this.onPieEnter}
+            />
+          </PieChart>
+      ))
+    return pi_charts
   }
 }
