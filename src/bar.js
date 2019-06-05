@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 import {
   BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine,
 } from 'recharts';
+import Chart from 'react-google-charts';
 
 // const data = [
 //   {
@@ -35,7 +36,15 @@ export default class Example extends PureComponent {
   render() {
     let { result } = this.props
     let key = 'sign'
-    let data = result.word_to_color.map((w,i) => {
+    let label1 = 'positive'
+    let label2 = 'negative '
+    if (result.prediction === 'SPAM' || result.prediction === 'NOTSPAM'){
+      label1 = 'Not Spam'
+      label2 = 'Spam'
+    }
+
+    let data = [['word', label1, label2]]
+    result.word_to_color.forEach((w,i) => {
       let pred = result.prediction
       let contr = result.contributions[i]
       let neg = 0
@@ -57,33 +66,54 @@ export default class Example extends PureComponent {
       if (_pred === 'NEGATIVE' && contr < 0)
         pos = contr * -1
 
-      return (pred === 'SPAM' || pred == 'NOTSPAM') ? 
-      { word: w, spam: neg, notspam: pos, amt:2000}
-      :
-      { word: w, neg: neg, pos: pos, amt: 2000 }
+      data.push([w, pos, neg])
+      // return (pred === 'SPAM' || pred == 'NOTSPAM') ? 
+      // { word: w, spam: neg, notspam: pos, amt:2000}
+      // :
+      // { word: w, neg: neg, pos: pos, amt: 2000 }
     })
  
-    let posKey = result.prediction === 'SPAM' || result.prediction === 'NOTSPAM' ?  'notspam' : 'pos'
-    let negKey = result.prediction === 'SPAM' || result.prediction === 'NOTSPAM' ?  'spam' : 'neg'
+    // let posKey = result.prediction === 'SPAM' || result.prediction === 'NOTSPAM' ?  'notspam' : 'pos'
+    // let negKey = result.prediction === 'SPAM' || result.prediction === 'NOTSPAM' ?  'spam' : 'neg'
     return result.prediction ? (
-      <BarChart
-        width={700}
-        height={300}
-        data={data}
-        stackOffset="sign"
-        margin={{
-          top: 5, right: 30, left: 20, bottom: 5,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="word" />
-        <YAxis />
-        <Tooltip />
-        <Legend verticalAlign='top'/>
-        <ReferenceLine y={0} stroke="#000" />
-        <Bar dataKey={posKey} fill="#0000ff" stackId="stack" />
-        <Bar dataKey={negKey} fill="#ff0000" stackId="stack" />
-      </BarChart>
+        <Chart
+            width={'800px'}
+            height={'500px'}
+            chartType="BarChart"
+            loader={<div>Loading Chart</div>}
+            data={data}
+            options={{
+              title: 'Words Signed Weight',
+              chartArea: { width: '50%' },
+              hAxis: {
+                title: 'Weight',
+                minValue: 0,
+              },
+              vAxis: {
+                title: 'Word',
+              },
+            }}
+            // For tests
+            rootProps={{ 'data-testid': '1' }}
+        />
     ) : null;
   }
 }
+      // <BarChart
+      //   width={700}
+      //   height={300}
+      //   data={data}
+      //   stackOffset="sign"
+      //   margin={{
+      //     top: 5, right: 30, left: 20, bottom: 5,
+      //   }}
+      // >
+      //   <CartesianGrid strokeDasharray="3 3" />
+      //   <XAxis dataKey="word" />
+      //   <YAxis />
+      //   <Tooltip />
+      //   <Legend verticalAlign='top'/>
+      //   <ReferenceLine y={0} stroke="#000" />
+      //   <Bar dataKey={posKey} fill="#0000ff" stackId="stack" />
+      //   <Bar dataKey={negKey} fill="#ff0000" stackId="stack" />
+      // </BarChart>

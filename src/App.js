@@ -3,6 +3,7 @@ import { Button, Form, Row, Col, OverlayTrigger, Tooltip } from 'react-bootstrap
 import withQuery from 'with-query'
 import Bar from './bar.js'
 import PieChart from './pichart.js'
+import Chart from 'react-google-charts';
 
 // var sentence = "I hate this resturant, Never come here"
 //I hate this resturant, Never come here
@@ -102,6 +103,7 @@ class App extends React.Component {
     .catch(err => console.log(err))
     .then(res => res.json())
     .then(data => {
+      console.log('data I got', data)
         let { prediction, words, contributions, word_count_total } = this.extract(data)
         this.setState({
           result: { 
@@ -209,7 +211,9 @@ class App extends React.Component {
         <Row>
             {this._renderPicharts()}
         </Row>
+        <Row>
 
+        </Row>
     </div>
     );
   }
