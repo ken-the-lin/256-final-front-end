@@ -84,15 +84,15 @@ class App extends React.Component {
 
   extract(data){
     // .log("my data", data)
-    // console.log("backend", data)
-    let { prediction, targets } = data
+    console.log("backend", data)
+    let { prediction, targets, proba } = data
     let weighted_spans = targets[0].weighted_spans
     let word_count_total = targets[0].word_count_total
     let words = weighted_spans.map(ws => ws[0])
     let contributions = weighted_spans.map(ws => ws[2])
     // console.log(words)
     // console.log(contributions)
-    return { prediction, words, contributions, word_count_total }
+    return { prediction, words, contributions, word_count_total, proba }
   }
 
   handleClick(e){
@@ -104,9 +104,10 @@ class App extends React.Component {
     .then(res => res.json())
     .then(data => {
       console.log('data I got', data)
-        let { prediction, words, contributions, word_count_total } = this.extract(data)
+        let { prediction, words, contributions, word_count_total, proba } = this.extract(data)
         this.setState({
           result: { 
+            proba: proba,
             prediction: prediction, 
             word_to_color: words, 
             contributions: contributions, 
@@ -126,7 +127,8 @@ class App extends React.Component {
       status = 'confirm'
     if (prediction === 'NEGATIVE' && weight >= 0)
       status = 'confirm'
-    let message = percent + '% of all reviews that contain the word \"' + word + "\"" +
+    let only = status === "disconfirm" ? "Only" : ""
+    let message = only + percent + '% of all reviews that contain the word \"' + word + "\"" +
                   " are " + pred
     return <span> {message} </span>
   }
@@ -165,9 +167,9 @@ class App extends React.Component {
         // <Col sm={{ offset: 3, span: 3}} md={{ offset: 3, span:3}} key={i}>
 
   render(){
-    // console.log('state', this.state)
+    console.log('state', this.state)
     let { textInput, result } = this.state
-    let { word_to_color } = result
+    let { word_to_color, proba } = result
     return (
       <div className="App">
         <Row>
@@ -191,11 +193,10 @@ class App extends React.Component {
         <Row>
           <Col sm={{ offset: 3, span: 6}} md={{ offset: 3, span:6}}>
             <div>
-              prediction result: {result.prediction}
+              prediction result: {result.prediction} <br/> with confidence: {proba}
             </div>
             <div style={{padding: "40px"}}> 
             {textInput.split(" ").map((w, i) => {
-
               w = w.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
               let word_index = result.word_to_color.findIndex(_w => _w === w)
               let isColored = word_index === -1 ? false : true; //no need to color the word
