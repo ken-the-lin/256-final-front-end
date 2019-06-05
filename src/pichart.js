@@ -7,14 +7,13 @@ import {OverlayTrigger} from 'react-bootstrap';
 //   { name: 'Group C', value: 300 }
 //   // { name: 'Group D', value: 200 },
 // ];
-var global_data = []
-
+var global_prediction = ""
 
 const renderActiveShape = (props) => {
   const RADIAN = Math.PI / 180;
   const {
     cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle,
-    fill, payload, percent, value,
+    prediction, payload, percent, value, explanation
   } = props;
   const sin = Math.sin(-RADIAN * midAngle);
   const cos = Math.cos(-RADIAN * midAngle);
@@ -26,11 +25,18 @@ const renderActiveShape = (props) => {
   const ey = my;
   const textAnchor = cos >= 0 ? 'start' : 'end';
 
+  let red = '#f73131'
+  let blue = '#4050f9'
+  let f1 = red
+  if (global_prediction === 'NEGATIVE' || global_prediction === 'SPAM'){
+    f1 = blue
+  }
+  // let f2 = f1 === '#f73131' ? '#4050f9' : '#f73131'
   // let count = global_data[0].value
   // let total = glo
   return (
     <g>
-      <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>{payload.name}</text>
+      <text x={cx} y={cy} dy={8} textAnchor="middle" fill='#000000'>{payload.name}</text>
       <Sector
         cx={cx}
         cy={cy}
@@ -38,7 +44,7 @@ const renderActiveShape = (props) => {
         outerRadius={outerRadius}
         startAngle={startAngle}
         endAngle={endAngle}
-        fill={fill}
+        fill={f1}
       />
       <Sector
         cx={cx}
@@ -47,10 +53,10 @@ const renderActiveShape = (props) => {
         endAngle={endAngle}
         innerRadius={outerRadius + 6}
         outerRadius={outerRadius + 10}
-        fill={fill}
+        fill={f1}
       />
-      <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
-      <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
+      <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={f1} fill="none" />
+      <circle cx={ex} cy={ey} r={2} fill={f1} stroke="none" />
         <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="#333">
           {`(${(percent * 100).toFixed(2)}%)`}
         </text>
@@ -76,33 +82,9 @@ export default class Example extends PureComponent {
   };
 
   render() {
-    let { data } = this.props
-    // let { word_count_total } = this.props
-    // // console.log("myprops", this.props.counts)
-    // let mydata = word_count_total.map( obj => {
-    //   let { word, count, total } = obj
-    //   return [
-    //     {name: word, value: count},
-    //     {name: word, value: total}
-    //   ]
-    // })
-    // console.log("pi char data", mydata)
-    // let pi_charts = mydata.map((d, i) => (
-    //       <PieChart width={400} height={400} key={i}>
-    //         <Pie
-    //           activeIndex={this.state.activeIndex}
-    //           activeShape={renderActiveShape}
-    //           data={d}
-    //           cx={200}
-    //           cy={200}
-    //           innerRadius={60}
-    //           outerRadius={80}
-    //           fill="#8884d8"
-    //           dataKey="value"
-    //           onMouseEnter={this.onPieEnter}
-    //         />
-    //       </PieChart>
-    //   ))
+    let { data, prediction } = this.props
+    global_prediction = prediction
+    console.log("pichar props", this.props)
     return (
           <PieChart width={400} height={400}>
             <Pie
@@ -113,10 +95,9 @@ export default class Example extends PureComponent {
               cy={200}
               innerRadius={60}
               outerRadius={80}
-              fill="#8884d8"
               dataKey="value"
-              onMouseEnter={this.onPieEnter}
             />
           </PieChart>)
   }
 }
+              // onMouseEnter={this.onPieEnter}

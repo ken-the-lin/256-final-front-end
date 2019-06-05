@@ -120,21 +120,25 @@ class App extends React.Component {
 
   _makeExplanation(percent, word, pred){
     // console.log(this.state.result)
-    let status = 'disconfirm'
+    let status = ''
     let { prediction, contributions, word_to_color } = this.state.result
-    let weight = word_to_color.findIndex(w => w === word)
+    let weight = contributions[word_to_color.findIndex(w => w === word)]
+    let prediction_display = this._prediction_display()
     if (prediction === 'POSITIVE' && weight >= 0)
       status = 'confirm'
-    if (prediction === 'NEGATIVE' && weight >= 0)
+    else if (prediction === 'NEGATIVE' && weight >= 0)
       status = 'confirm'
-    let only = status === "disconfirm" ? "Only" : ""
-    let message = only + percent + '% of all reviews that contain the word \"' + word + "\"" +
-                  " are " + pred
-    return <span> {message} </span>
+    else
+      status = 'disconfirm'
+    let only = <span> <b><u> {status === "disconfirm" ? "Only " : ""}</u> </b> </span>
+    console.log("status ?????" , word, prediction, weight, status)
+    let message = <span> {only} {percent + '% of all reviews that contain the word \"' + word + "\"" +
+                  " are "} {prediction_display} </span>
+    return message
   }
 
   _renderPicharts(){
-    let { word_count_total } = this.state.result
+    let { word_count_total, prediction } = this.state.result
     // console.log("myprops", this.props.counts)
     let mydata = word_count_total.map( obj => {
       let { word, count, total } = obj
@@ -148,28 +152,38 @@ class App extends React.Component {
       let rest = d[1].value
       let word = d[0].name
       let percent = getPercent(count/(count + rest))
+      let explanation = this._makeExplanation(percent, word, this.state.result.prediction)
       return (
-        <Col md={{ offset: 3, span:9}} key={i}>
+        <Col md={{ offset: 3, span:6}} key={i}>
           <Row>
             <Col md={4}>
-              <PieChart data={d}/>
+              <PieChart data={d} prediction={prediction} explanation={explanation}/>
             </Col>
-            <Col md={6}>
+            <Col md={{offset: 4, span: 4}}>
               <div style={{"marginTop": "100px"}}>
                 {this._makeExplanation(percent, word, this.state.result.prediction)}
               </div>
             </Col>
           </Row>
+          <hr/>
         </Col>
       )
     })
   }
         // <Col sm={{ offset: 3, span: 3}} md={{ offset: 3, span:3}} key={i}>
 
+  _prediction_display(){
+    let { prediction } = this.state.result
+    let prediction_result = prediction === 'POSITIVE' || prediction === 'NOTSPAM' ? (
+            <span style={{color: "#ff0000"}}> {prediction} </span>) :
+            (<span style={{color: "#0000ff"}}> {prediction} </span>)
+    return prediction_result
+  }
   render(){
     console.log('state', this.state)
     let { textInput, result } = this.state
-    let { word_to_color, proba } = result
+    let { word_to_color, proba, prediction } = result
+    let prediction_result = this._prediction_display()
     return (
       <div className="App">
         <Row>
@@ -188,13 +202,15 @@ class App extends React.Component {
         <Row>
           <Col sm={{ offset: 3, span: 6}} md={{ offset: 3, span:6}}>
             <Button size='sm' onClick={() => this.handleClick()}> Click </Button>
+            <hr/>
           </Col>
         </Row>
         <Row>
           <Col sm={{ offset: 3, span: 6}} md={{ offset: 3, span:6}}>
             <div>
-              prediction result: {result.prediction} <br/> with confidence: {proba}
+              prediction result: {prediction_result} <br/> with confidence: {proba}
             </div>
+            <hr/>
             <div style={{padding: "40px"}}> 
             {textInput.split(" ").map((w, i) => {
               w = w.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
@@ -205,11 +221,15 @@ class App extends React.Component {
               return <Word key={i} word={w} prediction={result.prediction} isColored={isColored} weight={weight} /> 
             })}
             </div>
+            <hr/>
+              This review is predicted as {prediction_result} because of the following: 
+            <hr/>
           </Col>
         </Row>
         <Row>
           <Col sm={{ offset: 3, span: 6}} md={{ offset: 3, span:6}}>
             <Bar result={this.state.result}/>
+            <hr/>
           </Col>
         </Row>
         <Row>
