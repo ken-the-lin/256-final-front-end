@@ -167,6 +167,7 @@ class App extends React.Component {
   render(){
     // console.log('state', this.state)
     let { textInput, result } = this.state
+    let { word_to_color } = result
     return (
       <div className="App">
         <Row>
@@ -194,6 +195,7 @@ class App extends React.Component {
             </div>
             <div style={{padding: "40px"}}> 
             {textInput.split(" ").map((w, i) => {
+              w = w.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
               let word_index = result.word_to_color.findIndex(_w => _w === w)
               let isColored = word_index === -1 ? false : true; //no need to color the word
               let weight = word_index === -1 ? 0 : result.contributions[word_index]

@@ -43,7 +43,7 @@ export default class Example extends PureComponent {
       label2 = 'Spam'
     }
 
-    let data = [['word', label1, label2]]
+    let data = [['word', label2, label1]]
     result.word_to_color.forEach((w,i) => {
       let pred = result.prediction
       let contr = result.contributions[i]
@@ -66,7 +66,7 @@ export default class Example extends PureComponent {
       if (_pred === 'NEGATIVE' && contr < 0)
         pos = contr * -1
 
-      data.push([w, pos, neg])
+      data.push([w, neg, pos])
       // return (pred === 'SPAM' || pred == 'NOTSPAM') ? 
       // { word: w, spam: neg, notspam: pos, amt:2000}
       // :
@@ -78,7 +78,7 @@ export default class Example extends PureComponent {
     return result.prediction ? (
         <Chart
             width={'800px'}
-            height={'500px'}
+            height={'800px'}
             chartType="BarChart"
             loader={<div>Loading Chart</div>}
             data={data}
